@@ -2,7 +2,7 @@
 /**
  * Dynamic Price Calculator Module
  * 
- * @author  Antigravity
+ * @author  Alberto Ortiz
  * @license http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * @version 1.0.0
  */
@@ -18,17 +18,17 @@ class DynamicPrice extends Module
         $this->name = 'dynamicprice';
         $this->tab = 'front_office_features';
         $this->version = '1.0.0';
-        $this->author = 'Antigravity';
+        $this->author = 'Alberto Ortiz';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.7.0.0', 'max' => _PS_VERSION_);
         $this->bootstrap = true;
 
         parent::__construct();
 
-        $this->displayName = $this->l('Dynamic Price Calculator');
-        $this->description = $this->l('Calculates product prices in real-time based on custom user parameters.');
+        $this->displayName = $this->trans('Dynamic Price Calculator', [], 'Modules.Dynamicprice.Admin');
+        $this->description = $this->trans('Calculates product prices in real-time based on custom user parameters.', [], 'Modules.Dynamicprice.Admin');
 
-        $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
+        $this->confirmUninstall = $this->trans('Are you sure you want to uninstall?', [], 'Modules.Dynamicprice.Admin');
     }
 
     public function install()
@@ -65,7 +65,7 @@ class DynamicPrice extends Module
     {
         // Only show for products that need it (you could add a configuration per product)
         $this->context->smarty->assign(array(
-            'calculator_title' => $this->l('Custom Dimensions'),
+            'calculator_title' => $this->trans('Custom Dimensions', [], 'Modules.Dynamicprice.Shop'),
         ));
 
         return $this->display(__FILE__, 'views/templates/hook/product_fields.tpl');

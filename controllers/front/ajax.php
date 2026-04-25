@@ -13,7 +13,10 @@ class DynamicPriceAjaxModuleFrontController extends ModuleFrontController
             $this->calculatePrice();
         }
         
-        die(json_encode(array('success' => false, 'message' => 'Invalid action')));
+        die(json_encode(array(
+            'success' => false, 
+            'message' => $this->module->trans('Invalid action', [], 'Modules.Dynamicprice.Shop')
+        )));
     }
 
     protected function calculatePrice()
