@@ -1,0 +1,64 @@
+/**
+ * Premium Styles for Dynamic Price Calculator
+ */
+#dynamic-price-calculator {
+    background: linear-gradient(145deg, #ffffff, #f0f4f8);
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    padding: 25px;
+    border-radius: 15px;
+    margin: 20px 0;
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
+#dynamic-price-calculator h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+
+#dynamic-price-calculator label {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+#dynamic-price-calculator .form-control {
+    border: 2px solid #edf2f7;
+    border-radius: 8px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+#dynamic-price-calculator .form-control:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+.dynamic-price-display {
+    background: #2d3748;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#computed-price-display {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #63b3ed;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dp-calc-field:hover {
+    background-color: #fff;
+    transform: translateY(-1px);
+}
