@@ -1,6 +1,6 @@
 # Dynamic 3D Quoter para PrestaShop 🛒
 
-Un módulo avanzado para PrestaShop (v1.7 / 8.x) que permite calcular y modificar el precio de un producto en tiempo real basándose en parámetros variables introducidos por el usuario. 
+Un módulo avanzado para PrestaShop (v1.X / 9.x) que permite calcular y modificar el precio de un producto en tiempo real basándose en parámetros variables introducidos por el usuario. 
 
 Diseñado específicamente para negocios de fabricación bajo demanda, permitiendo cotizar impresiones 3D directamente desde la ficha de producto.
 
