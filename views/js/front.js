@@ -14,6 +14,7 @@ $(document).ready(function() {
         const formData = {
             action: 'calculate',
             id_product: id_product,
+            token: dynamicprice_token,
             width: $('#dp_width').val(),
             height: $('#dp_height').val(),
             material: $('#dp_material').val(),
@@ -29,13 +30,12 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     // Update visual price
-                    $('#computed-price-display').text(response.formatted_price);
+                    $('#computed-price-display').text(response.formatted_price).css('color', '#2fb5d2');
                     
                     // Update the hidden input that will be sent to the cart
                     $('#custom_dynamic_price').val(response.raw_price);
-
-                    // Optional: Update PrestaShop's core price display if needed
-                    // $('.current-price span[itemprop="price"]').text(response.formatted_price);
+                } else {
+                    $('#computed-price-display').text(response.message).css('color', 'red');
                 }
             },
             error: function(err) {

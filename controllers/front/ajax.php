@@ -27,9 +27,33 @@ class DynamicPriceAjaxModuleFrontController extends ModuleFrontController
         $material = Tools::getValue('material');
         $density = (int)Tools::getValue('density');
 
+        // Security check: Token validation
+        $static_token = Tools::getToken(false);
+        if (Tools::getValue('token') !== $static_token) {
+            die(json_encode(array(
+                'success' => false, 
+                'message' => $this->module->trans('Security token expired. Please refresh the page.', [], 'Modules.Dynamicprice.Shop')
+            )));
+        }
+
+        // Validation: Range checks
+        $min_dim = (int)Configuration::get('DYNAMICPRICE_MIN_DIM');
+        $max_dim = (int)Configuration::get('DYNAMICPRICE_MAX_DIM');
+
+        if ($width < $min_dim || $width > $max_dim || $height < $min_dim || $height > $max_dim) {
+            die(json_encode(array(
+                'success' => false, 
+                'message' => $this->module->trans('Dimensions out of allowed range.', [], 'Modules.Dynamicprice.Shop')
+            )));
+        }
+
         // Logic for calculating the price using Back Office settings
         $base_price = Product::getPriceStatic($id_product, true);
         $base_cost = (float)Configuration::get('DYNAMICPRICE_BASE_COST');
+        
+        // Handling Taxes for the extra cost
+        $id_address = $this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')};
+        $tax_rate = Tax::getProductTaxRate($id_product, $id_address);
         
         $material_multiplier = 1.0;
         switch($material) {
@@ -47,8 +71,12 @@ class DynamicPriceAjaxModuleFrontController extends ModuleFrontController
         $volume_factor = ($width * $height) / 10000; // cm2
         $density_factor = 1 + ($density / 100);
 
-        // Formula: (Product Base Price + (Dimensions * Base Cost * Material)) * Density
-        $new_price = ($base_price + ($volume_factor * $base_cost * $material_multiplier)) * $density_factor;
+        // Extra cost calculation + Tax
+        $extra_cost = ($volume_factor * $base_cost * $material_multiplier);
+        $extra_cost_taxed = $extra_cost * (1 + ($tax_rate / 100));
+
+        // Final price formula
+        $new_price = ($base_price + $extra_cost_taxed) * $density_factor;
 
         // Store the calculation in the session so the cart override can find it
         $this->context->cookie->{'dp_custom_price_'.$id_product} = $new_price;

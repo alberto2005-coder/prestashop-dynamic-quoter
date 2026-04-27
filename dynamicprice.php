@@ -217,6 +217,7 @@ class DynamicPrice extends Module
         
         Media::addJsDef(array(
             'dynamicprice_ajax_url' => $this->context->link->getModuleLink($this->name, 'ajax', array(), true),
+            'dynamicprice_token' => Tools::getToken(false),
             'id_product' => (int)Tools::getValue('id_product')
         ));
     }
