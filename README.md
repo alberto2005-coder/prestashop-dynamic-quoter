@@ -32,3 +32,43 @@ Diseñado específicamente para negocios de fabricación bajo demanda, permitien
 3. El controlador valida los datos, aplica las fórmulas y devuelve el precio formateado.
 4. El precio se guarda en la cookie y en la tabla `ps_dynamicprice_info`.
 5. Al añadir al carrito, el override en `Cart.php` aplica el coste dinámico.
+
+
+---
+
+# English Version
+
+**Dynamic 3D Quoter for PrestaShop** 🛒
+
+An advanced module for PrestaShop (v1.7 / 8.x / 9.x) that calculates and modifies a product's price in real time based on variable parameters entered by the user.
+
+Designed specifically for made-to-order manufacturing businesses, it allows quoting 3D prints directly from the product page with a visual preview.
+
+## 🚀 Key Features
+
+* **Dynamic AJAX calculation:** Price updates on the frontend without page reloads.
+* **Premium interface:** Interactive sliders for dimensions and density.
+* **Dynamic Preview:** A visual box that scales in real time according to the entered dimensions.
+* **Multiple Materials:** Configurable multipliers for PLA, ABS and PETG.
+* **Data Persistence:** Custom parameters are stored in the database and visible in the order (Backoffice and Frontend).
+* **Safe Overriding:** Uses PrestaShop's override system to inject the customized price.
+
+## 🛠️ Technologies Used
+
+* **Backend:** PHP 8.0+, PrestaShop MVC architecture, MySQL.
+* **Frontend:** JavaScript (ES6+), jQuery, CSS3 (Modern UI).
+
+## ⚙️ Installation
+
+1. Download the repository as a `.zip` file.
+2. In the PrestaShop admin panel, go to "Modules > Module Manager > Upload a module".
+3. Select the `.zip` file.
+4. Configure the base costs and multipliers from the module's configuration page.
+
+## 💡 Workflow (Architecture)
+
+1. The user adjusts the parameters in `product_fields.tpl`.
+2. `front.js` detects the change, updates the preview and sends an AJAX request to the `ajax.php` controller.
+3. The controller validates the data, applies the formulas and returns the formatted price.
+4. The price is stored in the cookie and in the `ps_dynamicprice_info` table.
+5. When adding to the cart, the override in `Cart.php` applies the dynamic cost.
