@@ -11,11 +11,11 @@
             <tbody>
                 {foreach from=$custom_data item=item}
                     <tr>
-                        <td>{l s='Product ID:' d='Modules.Dynamicprice.Shop'} {$item.id_product}</td>
+                        <td>{l s='Product ID:' d='Modules.Dynamicprice.Shop'} {$item.id_product|intval}</td>
                         <td>
-                            <strong>{l s='Size:' d='Modules.Dynamicprice.Shop'}</strong> {$item.width}x{$item.height}mm<br>
-                            <strong>{l s='Material:' d='Modules.Dynamicprice.Shop'}</strong> {$item.material|upper}<br>
-                            <strong>{l s='Density:' d='Modules.Dynamicprice.Shop'}</strong> {$item.density}%
+                            <strong>{l s='Size:' d='Modules.Dynamicprice.Shop'}</strong> {$item.width|floatval}x{$item.height|floatval}mm<br>
+                            <strong>{l s='Material:' d='Modules.Dynamicprice.Shop'}</strong> {$item.material|escape:'html':'UTF-8'|upper}<br>
+                            <strong>{l s='Density:' d='Modules.Dynamicprice.Shop'}</strong> {$item.density|intval}%
                         </td>
                     </tr>
                 {/foreach}

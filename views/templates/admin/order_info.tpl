@@ -20,11 +20,11 @@
                 <tbody>
                     {foreach from=$custom_data item=item}
                         <tr>
-                            <td>{$item.id_product}</td>
-                            <td>{$item.width} mm</td>
-                            <td>{$item.height} mm</td>
-                            <td>{$item.material|upper}</td>
-                            <td>{$item.density}%</td>
+                            <td>{$item.id_product|intval}</td>
+                            <td>{$item.width|floatval} mm</td>
+                            <td>{$item.height|floatval} mm</td>
+                            <td>{$item.material|escape:'html':'UTF-8'|upper}</td>
+                            <td>{$item.density|intval}%</td>
                             <td>{displayPrice price=$item.price}</td>
                         </tr>
                     {/foreach}

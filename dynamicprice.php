@@ -240,10 +240,18 @@ class DynamicPrice extends Module
      */
     public function hookDisplayAdminOrderMain($params)
     {
-        $order = new Order((int)$params['id_order']);
-        $id_cart = (int)$order->id_cart;
+        $id_order = isset($params['id_order']) ? (int)$params['id_order'] : 0;
+        if ($id_order <= 0) {
+            return;
+        }
 
-        $custom_data = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'dynamicprice_info WHERE id_cart = ' . (int)$id_cart);
+        $order = new Order($id_order);
+        $id_cart = (int)$order->id_cart;
+        if ($id_cart <= 0) {
+            return;
+        }
+
+        $custom_data = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'dynamicprice_info` WHERE `id_cart` = ' . (int)$id_cart);
 
         if (!$custom_data) {
             return;
@@ -261,11 +269,24 @@ class DynamicPrice extends Module
      */
     public function hookDisplayOrderDetail($params)
     {
-        $id_order = (int)$params['order']->id;
-        $order = new Order($id_order);
-        $id_cart = (int)$order->id_cart;
+        $order = isset($params['order']) ? $params['order'] : null;
+        if ($order instanceof Order) {
+            $id_cart = (int)$order->id_cart;
+        } elseif (is_array($order) && isset($order['id'])) {
+            $orderObj = new Order((int)$order['id']);
+            $id_cart = (int)$orderObj->id_cart;
+        } elseif (isset($params['id_order'])) {
+            $orderObj = new Order((int)$params['id_order']);
+            $id_cart = (int)$orderObj->id_cart;
+        } else {
+            return;
+        }
 
-        $custom_data = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'dynamicprice_info WHERE id_cart = ' . (int)$id_cart);
+        if ($id_cart <= 0) {
+            return;
+        }
+
+        $custom_data = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'dynamicprice_info` WHERE `id_cart` = ' . (int)$id_cart);
 
         if (!$custom_data) {
             return;

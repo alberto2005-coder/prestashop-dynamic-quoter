@@ -13,6 +13,7 @@ class DynamicPriceAjaxModuleFrontController extends ModuleFrontController
             $this->calculatePrice();
         }
         
+        header('Content-Type: application/json');
         die(json_encode(array(
             'success' => false, 
             'message' => $this->module->trans('Invalid action', [], 'Modules.Dynamicprice.Shop')
@@ -27,23 +28,54 @@ class DynamicPriceAjaxModuleFrontController extends ModuleFrontController
         $material = Tools::getValue('material');
         $density = (int)Tools::getValue('density');
 
-        // Security check: Token validation
-        $static_token = Tools::getToken(false);
-        if (Tools::getValue('token') !== $static_token) {
+        // Security check: Token validation using timing-safe comparison
+        $static_token = (string)Tools::getToken(false);
+        $provided_token = (string)Tools::getValue('token');
+        if (!hash_equals($static_token, $provided_token)) {
+            header('Content-Type: application/json');
             die(json_encode(array(
                 'success' => false, 
                 'message' => $this->module->trans('Security token expired. Please refresh the page.', [], 'Modules.Dynamicprice.Shop')
             )));
         }
 
-        // Validation: Range checks
+        // Validation: Product ID
+        if ($id_product <= 0) {
+            header('Content-Type: application/json');
+            die(json_encode(array(
+                'success' => false,
+                'message' => $this->module->trans('Invalid product ID.', [], 'Modules.Dynamicprice.Shop')
+            )));
+        }
+
+        // Validation: Range checks for dimensions
         $min_dim = (int)Configuration::get('DYNAMICPRICE_MIN_DIM');
         $max_dim = (int)Configuration::get('DYNAMICPRICE_MAX_DIM');
 
-        if ($width < $min_dim || $width > $max_dim || $height < $min_dim || $height > $max_dim) {
+        if ($width < $min_dim || $width > $max_dim || $height < $min_dim || $height > $max_dim || !is_finite($width) || !is_finite($height)) {
+            header('Content-Type: application/json');
             die(json_encode(array(
                 'success' => false, 
                 'message' => $this->module->trans('Dimensions out of allowed range.', [], 'Modules.Dynamicprice.Shop')
+            )));
+        }
+
+        // Validation: Infill density bounds (0% to 100%)
+        if ($density < 0 || $density > 100) {
+            header('Content-Type: application/json');
+            die(json_encode(array(
+                'success' => false, 
+                'message' => $this->module->trans('Density must be between 0% and 100%.', [], 'Modules.Dynamicprice.Shop')
+            )));
+        }
+
+        // Validation: Material whitelist
+        $allowed_materials = array('pla', 'abs', 'petg');
+        if (!in_array($material, $allowed_materials, true)) {
+            header('Content-Type: application/json');
+            die(json_encode(array(
+                'success' => false, 
+                'message' => $this->module->trans('Invalid material selected.', [], 'Modules.Dynamicprice.Shop')
             )));
         }
 
@@ -52,11 +84,12 @@ class DynamicPriceAjaxModuleFrontController extends ModuleFrontController
         $base_cost = (float)Configuration::get('DYNAMICPRICE_BASE_COST');
         
         // Handling Taxes for the extra cost
-        $id_address = $this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')};
+        $tax_address_type = Configuration::get('PS_TAX_ADDRESS_TYPE');
+        $id_address = isset($this->context->cart->{$tax_address_type}) ? (int)$this->context->cart->{$tax_address_type} : 0;
         $tax_rate = Tax::getProductTaxRate($id_product, $id_address);
         
         $material_multiplier = 1.0;
-        switch($material) {
+        switch ($material) {
             case 'pla': 
                 $material_multiplier = (float)Configuration::get('DYNAMICPRICE_PLA_MULT'); 
                 break;
@@ -77,6 +110,14 @@ class DynamicPriceAjaxModuleFrontController extends ModuleFrontController
 
         // Final price formula
         $new_price = ($base_price + $extra_cost_taxed) * $density_factor;
+
+        if ($new_price <= 0 || !is_finite($new_price)) {
+            header('Content-Type: application/json');
+            die(json_encode(array(
+                'success' => false,
+                'message' => $this->module->trans('Invalid price calculation.', [], 'Modules.Dynamicprice.Shop')
+            )));
+        }
 
         // Store the calculation in the session so the cart override can find it
         $this->context->cookie->{'dp_custom_price_'.$id_product} = $new_price;
@@ -114,6 +155,7 @@ class DynamicPriceAjaxModuleFrontController extends ModuleFrontController
             ));
         }
 
+        header('Content-Type: application/json');
         die(json_encode(array(
             'success' => true,
             'raw_price' => $new_price,

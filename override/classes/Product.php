@@ -24,7 +24,7 @@ class Product extends ProductCore
         &$specific_price_output = null,
         $with_eco_tax = true,
         $use_group_reduction = true,
-        Context $context = null,
+        ?Context $context = null,
         $use_customer_price = true
     ) {
         $price = parent::getPriceStatic(
