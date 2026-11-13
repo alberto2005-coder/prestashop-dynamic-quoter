@@ -1,129 +1,189 @@
-# Dynamic 3D Quoter para PrestaShop 🛒
+# Dynamic 3D Quoter para PrestaShop
 
-Un módulo avanzado para PrestaShop (v1.7 / 8.x / 9.x) que permite calcular y modificar el precio de un producto en tiempo real basándose en parámetros variables introducidos por el usuario. 
+[![PrestaShop](https://img.shields.io/badge/PrestaShop-1.7%20%7C%208.x%20%7C%209.x-DF0067?logo=prestashop&logoColor=white)](https://www.prestashop-project.org/)
+[![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![MIT](https://img.shields.io/badge/Licencia-MIT-green)](LICENSE)
 
-Diseñado específicamente para negocios de fabricación bajo demanda, permitiendo cotizar impresiones 3D directamente desde la ficha de producto con previsualización visual.
-
-## 🚀 Características Principales
-
-* **Cálculo dinámico por AJAX:** Actualización del precio en el frontend sin recargas de página.
-* **Interfaz Premium:** Sliders interactivos para dimensiones y densidad.
-* **Previsualización Dinámica:** Recuadro visual que escala en tiempo real según las dimensiones introducidas.
-* **Múltiples Materiales:** Configuración de multiplicadores para PLA, ABS y PETG.
-* **Persistencia de Datos:** Los parámetros personalizados se guardan en la base de datos y son visibles en el pedido (Backoffice y Frontend).
-* **Sobreescritura segura:** Utiliza el sistema de overrides de PrestaShop para inyectar el precio personalizado.
-* **Seguridad y Validación Reforzada:** Protección CSRF timing-safe, validación estricta de límites (densidad 0-100%, dimensiones finitas) y lista blanca de materiales.
-
-## 📊 Matriz de Compatibilidad (PrestaShop & PHP)
-
-> **Nota sobre el soporte de PHP:** PHP 8.0 y versiones anteriores han alcanzado su fin de ciclo de vida (EOL) y ya no reciben soporte oficial de seguridad. Se recomienda encarecidamente utilizar versiones con soporte activo (**PHP 8.1, 8.2 o 8.3**).
-
-| Versión PrestaShop | Ciclo de Vida PrestaShop | Versiones PHP Compatibles | Versión PHP Recomendada | Estado del Módulo |
-| :--- | :--- | :--- | :--- | :--- |
-| **PrestaShop 9.0.x** | Activo (Próxima gen) | PHP 8.1, 8.2, 8.3, 8.4 | PHP 8.2 / 8.3 | Compatible (Forward Ready) |
-| **PrestaShop 8.2.x** | Soporte Activo | PHP 8.1, 8.2, 8.3 | PHP 8.2 / 8.3 | ✅ Soporte Oficial |
-| **PrestaShop 8.1.x** | Soporte Activo (LTS) | PHP 8.1, 8.2 | PHP 8.1 / 8.2 | ✅ Soporte Oficial |
-| **PrestaShop 1.7.8.x** | EOL (Fin de Soporte) | PHP 7.4 *(PS 1.7 no soporta PHP 8.1+)* | PHP 7.4 (Legacy) | Modo Legacy / Compatibilidad |
-
-## 🛠️ Tecnologías Utilizadas
-
-* **Backend:** PHP 8.1+ (compatible con PHP 8.2, 8.3 y 8.4; PHP 7.4 en modo legacy), Arquitectura MVC de PrestaShop, MySQL.
-* **Frontend:** JavaScript (ES6+), jQuery, CSS3 (Modern UI).
-
-## 🔒 Auditoría de Seguridad y Parches Aplicados
-
-1. **Prevención de Bypass de Precios:** Validación estricta de rangos para infill/densidad (0% - 100%) y verificación de números finitos para dimensiones, evitando manipulación o precios nulos/negativos.
-2. **Protección CSRF y Timing Attacks:** Validación de tokens mediante comparación segura en tiempo constante (`hash_equals`).
-3. **Lista Blanca de Materiales:** Validación estricta de los materiales permitidos (`pla`, `abs`, `petg`).
-4. **Protección XSS:** Escapado riguroso de variables en plantillas Smarty tanto en Back Office como Front Office.
-5. **Compatibilidad PHP 8.4+:** Eliminación de advertencias de tipo nulo implícito (`?Context $context = null` en `Product.php`).
-
-## ⚙️ Instalación
-
-1. Descarga el repositorio como un archivo `.zip`.
-2. En el panel de administración de PrestaShop, ve a "Módulos > Gestor de Módulos > Subir un módulo".
-3. Selecciona el archivo `.zip`.
-4. Configura los costes base y multiplicadores desde la página de configuración del módulo.
-
-## 💡 Flujo de trabajo (Arquitectura)
-
-1. El usuario ajusta los parámetros en `product_fields.tpl`.
-2. `front.js` detecta el cambio, actualiza la previsualización y envía una petición AJAX al controlador `ajax.php`.
-3. El controlador valida los datos, aplica las fórmulas y devuelve el precio formateado.
-4. El precio se guarda en la cookie y en la tabla `ps_dynamicprice_info`.
-5. Al añadir al carrito, el override en `Cart.php` aplica el coste dinámico.
-
-## 🧪 Pruebas Automatizadas
-
-El proyecto incluye una suite de pruebas para verificar la compatibilidad de versiones PHP y las reglas de seguridad:
-
-```bash
-php tests/test_compatibility_and_security.php
-```
+[Español](#español) · [English](#english)
 
 ---
 
-# English Version
+## Español
 
-**Dynamic 3D Quoter for PrestaShop** 🛒
+### Índice
 
-An advanced module for PrestaShop (v1.7 / 8.x / 9.x) that calculates and modifies a product's price in real time based on variable parameters entered by the user.
+- [Descripción](#descripción)
+- [Características](#características)
+- [Compatibilidad](#compatibilidad)
+- [Cómo funciona](#cómo-funciona)
+- [Instalación](#instalación)
+- [Configuración](#configuración)
+- [Pruebas](#pruebas)
+- [Seguridad](#seguridad)
+- [Licencia](#licencia)
 
-Designed specifically for made-to-order manufacturing businesses, it allows quoting 3D prints directly from the product page with a visual preview.
+### Descripción
 
-## 🚀 Key Features
+Módulo de **PrestaShop** que calcula el precio de un producto en tiempo real a partir de parámetros que introduce el cliente: dimensiones, densidad de relleno y material. Está pensado para negocios de **fabricación bajo demanda** e **impresión 3D**, con previsualización visual y cálculo por AJAX antes de añadir al carrito.
 
-* **Dynamic AJAX calculation:** Price updates on the frontend without page reloads.
-* **Premium interface:** Interactive sliders for dimensions and density.
-* **Dynamic Preview:** A visual box that scales in real time according to the entered dimensions.
-* **Multiple Materials:** Configurable multipliers for PLA, ABS and PETG.
-* **Data Persistence:** Custom parameters are stored in the database and visible in the order (Backoffice and Frontend).
-* **Safe Overriding:** Uses PrestaShop's override system to inject the customized price.
-* **Hardened Security & Validation:** Timing-safe CSRF protection, strict boundary validation (density 0-100%, finite dimensions), and material whitelisting.
+### Características
 
-## 📊 Compatibility Matrix (PrestaShop & PHP)
+- **Cálculo dinámico por AJAX**, sin recargar la página.
+- **Sliders** para dimensiones y densidad.
+- **Previsualización** que escala en tiempo real según las medidas.
+- **Materiales con multiplicador**: PLA, ABS y PETG.
+- **Persistencia**: los parámetros se guardan y aparecen en el pedido, en el frontend y en el backoffice.
+- **Override seguro** del precio mediante el sistema de overrides de PrestaShop.
+- **Validación reforzada**: límites de densidad (0–100 %), dimensiones finitas y lista blanca de materiales.
 
-> **Note on PHP Support:** PHP 8.0 and earlier have reached End-of-Life (EOL) and no longer receive security maintenance. Using actively supported PHP versions (**PHP 8.1, 8.2, or 8.3**) is strongly recommended.
+### Compatibilidad
 
-| PrestaShop Version | PrestaShop Lifecycle | Supported PHP Versions | Recommended PHP Version | Module Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **PrestaShop 9.0.x** | Active (Next Gen) | PHP 8.1, 8.2, 8.3, 8.4 | PHP 8.2 / 8.3 | Compatible (Forward Ready) |
-| **PrestaShop 8.2.x** | Active Support | PHP 8.1, 8.2, 8.3 | PHP 8.2 / 8.3 | ✅ Officially Supported |
-| **PrestaShop 8.1.x** | Active Support (LTS) | PHP 8.1, 8.2 | PHP 8.1 / 8.2 | ✅ Officially Supported |
-| **PrestaShop 1.7.8.x** | EOL (End of Life) | PHP 7.4 *(PS 1.7 does not support PHP 8.1+)* | PHP 7.4 (Legacy) | Legacy Mode / Compatible |
+| PrestaShop | Ciclo de vida | PHP compatible | PHP recomendado | Estado |
+|---|---|---|---|---|
+| 9.0.x | Activo | 8.1, 8.2, 8.3, 8.4 | 8.2 / 8.3 | Compatible |
+| 8.2.x | Soporte activo | 8.1, 8.2, 8.3 | 8.2 / 8.3 | Soporte oficial |
+| 8.1.x | Soporte activo (LTS) | 8.1, 8.2 | 8.1 / 8.2 | Soporte oficial |
+| 1.7.8.x | EOL | 7.4 | 7.4 (legacy) | Modo legacy |
 
-## 🛠️ Technologies Used
+PHP 8.0 y anteriores están fuera de soporte: usa 8.1 o superior siempre que puedas.
 
-* **Backend:** PHP 8.1+ (compatible with PHP 8.2, 8.3, and 8.4; PHP 7.4 in legacy mode), PrestaShop MVC architecture, MySQL.
-* **Frontend:** JavaScript (ES6+), jQuery, CSS3 (Modern UI).
+### Cómo funciona
 
-## 🔒 Security Audit & Applied Fixes
+1. El cliente ajusta los parámetros en `product_fields.tpl`.
+2. `front.js` actualiza la previsualización y envía una petición AJAX a `ajax.php`.
+3. El controlador valida los datos, aplica las fórmulas y devuelve el precio formateado.
+4. El precio se guarda en la cookie y en la tabla `ps_dynamicprice_info`.
+5. Al añadir al carrito, el override de `Cart.php` aplica el coste dinámico.
 
-1. **Price Manipulation Bypass Prevention:** Strict bounding on infill density (0% - 100%) and finite float checking on dimensions, preventing zero-price or negative pricing attacks.
-2. **CSRF & Timing Attack Protection:** Token verification using constant-time comparison (`hash_equals`).
-3. **Material Whitelist:** Whitelist enforcement on material options (`pla`, `abs`, `petg`).
-4. **XSS Protection:** Context-aware Smarty variable escaping across Front Office and Back Office order detail views.
-5. **PHP 8.4+ Compatibility:** Fixed implicit nullable parameter warning (`?Context $context = null` in `Product.php`).
+### Instalación
 
-## ⚙️ Installation
+1. Descarga el repositorio como `.zip`.
+2. En el backoffice: **Módulos → Gestor de módulos → Subir un módulo**.
+3. Sube el `.zip` y pulsa **Instalar**.
+4. Configura los costes base y los multiplicadores en la página del módulo.
 
-1. Download the repository as a `.zip` file.
-2. In the PrestaShop admin panel, go to "Modules > Module Manager > Upload a module".
-3. Select the `.zip` file.
-4. Configure the base costs and multipliers from the module's configuration page.
+> [!NOTE]
+> El ZIP debe contener la carpeta del módulo (`dynamicprice/`) en la raíz, no los archivos sueltos. Si PrestaShop no lo reconoce, comprueba esa estructura antes de volver a subirlo.
 
-## 💡 Workflow (Architecture)
+### Configuración
 
-1. The user adjusts the parameters in `product_fields.tpl`.
-2. `front.js` detects the change, updates the preview and sends an AJAX request to the `ajax.php` controller.
-3. The controller validates the data, applies the formulas and returns the formatted price.
-4. The price is stored in the cookie and in the `ps_dynamicprice_info` table.
-5. When adding to the cart, the override in `Cart.php` applies the dynamic cost.
+Desde la configuración del módulo defines:
 
-## 🧪 Automated Testing
+- **Coste base** por pieza.
+- **Precio por volumen** y por gramo, según tu modelo de negocio.
+- **Multiplicadores** de material (PLA, ABS, PETG).
+- **Límites** de dimensiones y densidad.
 
-The repository provides a test suite to verify PHP compatibility and security validation rules:
+Ajusta las fórmulas a tus costes reales antes de publicar el módulo en una tienda en producción.
+
+### Pruebas
 
 ```bash
 php tests/test_compatibility_and_security.php
 ```
+
+La suite comprueba la compatibilidad de versiones de PHP y las reglas de validación: rangos de densidad, dimensiones finitas, lista blanca de materiales y comparación segura de tokens.
+
+### Seguridad
+
+- **CSRF**: comparación con `hash_equals` en tiempo constante.
+- **Validación de precios**: evita valores nulos, negativos o fuera de rango.
+- **XSS**: escapado de variables en las plantillas Smarty.
+- **Materiales**: solo se aceptan `pla`, `abs` y `petg`.
+
+Aun así, revisa el módulo con tus propios datos y prueba el flujo completo en una tienda de staging antes de instalarlo en producción.
+
+### Licencia
+
+**MIT** — consulta [LICENSE](LICENSE).
+
+---
+
+## English
+
+### Table of contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Compatibility](#compatibility)
+- [How it works](#how-it-works)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [Security](#security)
+- [License](#license)
+
+### Overview
+
+A **PrestaShop** module that calculates a product's price in real time from customer-supplied parameters: dimensions, infill density and material. It targets **made-to-order manufacturing** and **3D printing** businesses, with a visual preview and AJAX calculation before adding to the cart.
+
+### Features
+
+- **Dynamic AJAX calculation** without reloading the page.
+- **Sliders** for dimensions and density.
+- **Preview** that scales in real time with the measurements.
+- **Material multipliers**: PLA, ABS and PETG.
+- **Persistence**: parameters are stored and shown on the order, in the frontend and in the back office.
+- **Safe price override** through PrestaShop's override system.
+- **Hardened validation**: density bounds (0–100 %), finite dimensions and a material whitelist.
+
+### Compatibility
+
+| PrestaShop | Lifecycle | Supported PHP | Recommended PHP | Status |
+|---|---|---|---|---|
+| 9.0.x | Active | 8.1, 8.2, 8.3, 8.4 | 8.2 / 8.3 | Compatible |
+| 8.2.x | Active support | 8.1, 8.2, 8.3 | 8.2 / 8.3 | Officially supported |
+| 8.1.x | Active support (LTS) | 8.1, 8.2 | 8.1 / 8.2 | Officially supported |
+| 1.7.8.x | EOL | 7.4 | 7.4 (legacy) | Legacy mode |
+
+PHP 8.0 and earlier are end-of-life: use 8.1 or later whenever possible.
+
+### How it works
+
+1. The customer adjusts the parameters in `product_fields.tpl`.
+2. `front.js` updates the preview and sends an AJAX request to `ajax.php`.
+3. The controller validates the data, applies the formulas and returns the formatted price.
+4. The price is stored in a cookie and in the `ps_dynamicprice_info` table.
+5. When adding to the cart, the `Cart.php` override applies the dynamic cost.
+
+### Installation
+
+1. Download the repository as a `.zip`.
+2. In the back office: **Modules → Module Manager → Upload a module**.
+3. Upload the `.zip` and click **Install**.
+4. Configure base costs and multipliers on the module page.
+
+> [!NOTE]
+> The ZIP must contain the module folder (`dynamicprice/`) at its root, not loose files. If PrestaShop does not recognise it, check that structure before uploading again.
+
+### Configuration
+
+The module settings let you define:
+
+- **Base cost** per piece.
+- **Price per volume** and per gram, according to your business model.
+- **Material multipliers** (PLA, ABS, PETG).
+- **Dimension and density limits**.
+
+Adjust the formulas to your real costs before publishing the module on a production store.
+
+### Testing
+
+```bash
+php tests/test_compatibility_and_security.php
+```
+
+The suite checks PHP version compatibility and the validation rules: density ranges, finite dimensions, material whitelist and constant-time token comparison.
+
+### Security
+
+- **CSRF**: constant-time comparison with `hash_equals`.
+- **Price validation**: rejects null, negative or out-of-range values.
+- **XSS**: escaped variables in Smarty templates.
+- **Materials**: only `pla`, `abs` and `petg` are accepted.
+
+Even so, review the module with your own data and run the full flow on a staging store before installing it in production.
+
+### License
+
+**MIT** — see [LICENSE](LICENSE).
